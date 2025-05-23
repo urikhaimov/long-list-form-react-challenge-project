@@ -1,5 +1,5 @@
 
-import React, { useMemo, memo} from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
@@ -67,7 +67,7 @@ const SortableVirtualList = ({
     onReorder(arrayMove(users, oldIndex, newIndex));
   };
 
-  const Row = (({ index, style }) => {
+  const Row = useCallback(({ index, style }) => {
     const user = users[index];
     if (!user) return null;
     return (

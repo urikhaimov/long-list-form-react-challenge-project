@@ -9,7 +9,10 @@ import { validateUser } from '../../utils/validators';
 const countryOptions = ["Israel", "China", "Ukraine", "Canada", "Brazil", "Morocco", "France", "Japan"];
 
 const UsersPage = () => {
-  const { users = [], dispatch } = useUsersContext();
+  //const { users = [], dispatch } = useUsersContext();
+  const { state, dispatch } = useUsersContext();
+  const users = state.users || [];
+  console.log('users', users)
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredUsers = useMemo(() => {

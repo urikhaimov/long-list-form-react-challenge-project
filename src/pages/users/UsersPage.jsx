@@ -9,10 +9,9 @@ import { validateUser } from '../../utils/validators';
 const countryOptions = ["Israel", "China", "Ukraine", "Canada", "Brazil", "Morocco", "France", "Japan"];
 
 const UsersPage = () => {
-  //const { users = [], dispatch } = useUsersContext();
   const { state, dispatch } = useUsersContext();
   const users = state.users || [];
-  console.log('users', users)
+
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredUsers = useMemo(() => {
@@ -24,10 +23,10 @@ const UsersPage = () => {
     );
   }, [users, searchTerm]);
 
-  const errors = useMemo(() => {
+  const errorsMap = useMemo(() => {
     const map = {};
     filteredUsers.forEach((user) => {
-      const userErrors = validateUser(user, countryOptions) || {};
+      const userErrors = validateUser(user, countryOptions);
       if (Object.keys(userErrors).length > 0) {
         map[user.id] = userErrors;
       }
@@ -35,50 +34,25 @@ const UsersPage = () => {
     return map;
   }, [filteredUsers]);
 
-  const errorSummary = useMemo(() => {
-    let empty = 0;
-    let invalid = 0;
-    Object.values(errors).forEach((userErrors) => {
-      Object.values(userErrors).forEach((error) => {
-        if (error === 'empty' || error === 'Required') empty++;
-        else invalid++;
-      });
-    });
-    return { empty, invalid };
-  }, [errors]);
+  const handleFieldChange = useCallback((userId, field, value) => {
+  dispatch({
+    type: 'UPDATE_USER_BY_ID',
+    payload: { id: userId, field, value }
+  });
+}, [dispatch]);
 
-  const hasErrors = errorSummary.empty > 0 || errorSummary.invalid > 0;
+  const handleDelete = useCallback((userId) => {
+    dispatch({ type: 'DELETE_USER_BY_ID', payload: userId });
+  }, [dispatch]);
 
   const handleAdd = () => {
     dispatch({ type: 'ADD_USER' });
   };
 
-  const handleSave = () => {
-    if (hasErrors) {
-      const firstErrorId = Object.keys(errors)[0];
-      const rowEl = document.querySelector(`[data-row="${firstErrorId}"]`);
-      if (rowEl) {
-        rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
-    }
-
-    localStorage.setItem('users', JSON.stringify(users));
-  };
-
-  const handleFieldChange = useCallback((index, field, value) => {
-    const updatedUser = { ...users[index], [field]: value };
-    dispatch({ type: 'UPDATE_USER', index, payload: updatedUser });
-  }, [users, dispatch]);
-
-  const handleDelete = useCallback((index) => {
-    dispatch({ type: 'DELETE_USER', index });
-  }, [dispatch]);
-
   const handleReorder = useCallback((newUsers) => {
     dispatch({ type: 'SET_USERS', payload: newUsers });
   }, [dispatch]);
-
+   if (!users || users.length === 0) return <div>Loading users...</div>;
   return (
     <Box p={2}>
       <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -101,22 +75,15 @@ const UsersPage = () => {
           onReorder={handleReorder}
           onFieldChange={handleFieldChange}
           onDelete={handleDelete}
-          errorsMap={errors}
+          errorsMap={errorsMap}
           countryOptions={countryOptions}
         />
       </Box>
 
-      {(errorSummary.empty > 0 || errorSummary.invalid > 0) && (
-        <Typography color="error" mt={2}>
-          Errors: Empty Fields - {errorSummary.empty}, Invalid Fields - {errorSummary.invalid}
-        </Typography>
-      )}
-
       <Box mt={2}>
         <Button
           variant="contained"
-          onClick={handleSave}
-          disabled={hasErrors}
+          onClick={() => localStorage.setItem('usersData', JSON.stringify(users))}
         >
           Save
         </Button>

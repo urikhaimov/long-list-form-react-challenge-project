@@ -28,7 +28,7 @@ export const usersReducer = (state, action) => {
         ...state,
         users: state.users.filter((_, index) => index !== action.index),
       };
-   case 'INIT_USERS':
+    case 'INIT_USERS':
       const localData = JSON.parse(localStorage.getItem('users'));
       return {
         ...state,
@@ -42,7 +42,17 @@ export const usersReducer = (state, action) => {
         ...state,
         originalUsers: [...state.users],
       };
+    case 'UPDATE_USER_BY_ID':
+      return {
+        ...state,
+        users: state.users.map(user =>
+          user.id === action.payload.id
+            ? { ...user, [action.payload.field]: action.payload.value }
+            : user
+        )
+      };
     default:
       return state;
+
   }
 };

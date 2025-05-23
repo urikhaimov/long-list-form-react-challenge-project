@@ -6,7 +6,7 @@ import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback';
 
 
 const UserRow = ({ user, onChange, onDelete, errors, countryOptions }) => {
- console.log('Rendering row:', user.id);
+ console.log('Rendering   row:', user.id);
  
    const [local, setLocal] = useState({
      name: user.name,
